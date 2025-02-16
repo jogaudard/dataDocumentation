@@ -2,6 +2,7 @@
 
 export(create_durin_meta_data)
 export(create_funder_meta_data)
+export(create_threed_ZA_meta_data)
 export(create_threed_meta_data)
 export(funcabization)
 export(get_started)
