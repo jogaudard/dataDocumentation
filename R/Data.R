@@ -33,6 +33,22 @@
 #' @source \url{https://osf.io/4c5v2/}
 "description_table"
 
+#' Previous description table
+#'
+#' A minimal description table containing only year and siteID variables.
+#' Used to demonstrate pre-filling in make_description_table().
+#'
+#' @format A tibble with 2 rows and 5 variables:
+#' \describe{
+#'   \item{TableID}{unique code for each dataset}
+#'   \item{Variable name}{variable name}
+#'   \item{Description}{variable description}
+#'   \item{Units}{units for variables}
+#'   \item{How measured}{how a variable was measured}
+#'   ...
+#' }
+"previous_description_table"
+
 
 #' Block dictionary
 #'
