@@ -148,17 +148,21 @@ test_that("make_description_table writes CSV when path is provided", {
     siteID = c("A", "B")
   )
 
-  # Create temporary file path
-  temp_file <- tempfile(fileext = ".csv")
+  # Create temporary directory path
+  temp_dir <- tempfile()
 
   # Run function with path
   result <- make_description_table(
     data = test_data,
     table_ID = "test",
-    path = temp_file
+    path = temp_dir
   )
 
+  # Check that directory was created
+  expect_true(dir.exists(temp_dir))
+
   # Check that file was created
+  temp_file <- file.path(temp_dir, "description_table.csv")
   expect_true(file.exists(temp_file))
 
   # Read the file back and compare
@@ -170,7 +174,26 @@ test_that("make_description_table writes CSV when path is provided", {
   expect_s3_class(result, "tbl_df")
 
   # Clean up
+  unlink(temp_dir, recursive = TRUE)
 
-  unlink(temp_file)
+})
+
+
+test_that("make_description_table does not write when path is NULL", {
+
+  test_data <- tibble(
+    year = c(2020, 2021)
+  )
+
+  # Run function with path = NULL
+  result <- make_description_table(
+    data = test_data,
+    table_ID = "test",
+    path = NULL
+  )
+
+  # Function should still return the tibble
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 1)
 
 })

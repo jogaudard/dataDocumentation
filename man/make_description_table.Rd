@@ -8,7 +8,7 @@ make_description_table(
   data,
   table_ID,
   previous_description_table = NULL,
-  path = NULL
+  path = "data_dic"
 )
 }
 \arguments{
@@ -21,8 +21,9 @@ the same name across different datasets.}
 pre-fill descriptions for variables that already exist. If NULL (default),
 all Description, Units, and How measured columns will be NA.}
 
-\item{path}{optional; file path to write the description table as a CSV file.
-If NULL (default), no file is written.}
+\item{path}{directory path to write the description table as a CSV file.
+Default is "data_dic". The directory will be created if it does not exist.
+The file will be named "description_table.csv". Set to NULL to skip writing.}
 }
 \value{
 a tibble with columns: TableID, Variable name, Description, Units, How measured
@@ -34,18 +35,19 @@ This table can then be used as input for make_data_dictionary().
 \examples{
 data(biomass)
 description <- make_description_table(data = biomass,
-                                       table_ID = "biomass")
+                                       table_ID = "biomass",
+                                       path = NULL)
 
 # Using a previous description table to pre-fill known variables
 data(previous_description_table)
 description <- make_description_table(data = biomass,
                                        table_ID = "biomass",
-                                       previous_description_table = previous_description_table)
+                                       previous_description_table = previous_description_table,
+                                       path = NULL)
 
-# Write to CSV file
+# Write to CSV file in data_dic folder (default)
 \dontrun{
 make_description_table(data = biomass,
-                       table_ID = "biomass",
-                       path = "description_table.csv")
+                       table_ID = "biomass")
 }
 }

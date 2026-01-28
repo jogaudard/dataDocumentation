@@ -7,8 +7,9 @@
 #' @param previous_description_table optional; a previous description table to
 #' pre-fill descriptions for variables that already exist. If NULL (default),
 #' all Description, Units, and How measured columns will be NA.
-#' @param path optional; file path to write the description table as a CSV file.
-#' If NULL (default), no file is written.
+#' @param path directory path to write the description table as a CSV file.
+#' Default is "data_dic". The directory will be created if it does not exist.
+#' The file will be named "description_table.csv". Set to NULL to skip writing.
 #'
 #' @return a tibble with columns: TableID, Variable name, Description, Units, How measured
 #'
@@ -19,23 +20,24 @@
 #' @examples
 #' data(biomass)
 #' description <- make_description_table(data = biomass,
-#'                                        table_ID = "biomass")
+#'                                        table_ID = "biomass",
+#'                                        path = NULL)
 #'
 #' # Using a previous description table to pre-fill known variables
 #' data(previous_description_table)
 #' description <- make_description_table(data = biomass,
 #'                                        table_ID = "biomass",
-#'                                        previous_description_table = previous_description_table)
+#'                                        previous_description_table = previous_description_table,
+#'                                        path = NULL)
 #'
-#' # Write to CSV file
+#' # Write to CSV file in data_dic folder (default)
 #' \dontrun{
 #' make_description_table(data = biomass,
-#'                        table_ID = "biomass",
-#'                        path = "description_table.csv")
+#'                        table_ID = "biomass")
 #' }
 #' @export
 
-make_description_table <- function(data, table_ID, previous_description_table = NULL, path = NULL) {
+make_description_table <- function(data, table_ID, previous_description_table = NULL, path = "data_dic") {
 
   # Get all variable names from the data
 
@@ -78,7 +80,13 @@ make_description_table <- function(data, table_ID, previous_description_table = 
 
   # Write to CSV if path is provided
   if (!is.null(path)) {
-    write_csv(description_table, path)
+    # Create directory if it doesn't exist
+    if (!dir.exists(path)) {
+      dir.create(path, recursive = TRUE)
+    }
+    # Write to description_table.csv in the specified directory
+    file_path <- file.path(path, "description_table.csv")
+    write_csv(description_table, file_path)
   }
 
   description_table
