@@ -37,64 +37,110 @@ remotes::install_github("audhalbritter/dataDocumentation")
 library(dataDocumentation)
 ```
 
-## Functions
-
-### get started
-
-The first time you use the package in a project run the `get_started()`
-function. This function will help you to set up a new directory for
-creating the data dictionary. In addition, it will create a template
-file for the description table.
-
-The function has one argument `path`, where you can choose the location
-for the new directory. The default is “data_dic”.
-
-``` r
-
-get_started(path = "data_dic")
-```
-
-There is now a new folder called **data_dic** in the folder structure
-and it contains a file called **description_table.csv**.
-
-<img src="pics/dir_tree.png" width="40%" />
+## Data dictionaries
 
 ### description table
 
-The description table is an empty file with four columns:
+The description table contains the information about each variable in
+your dataset. You can create this table using the
+`make_description_table()` function. By default, this function creates a
+**data_dic** folder and writes the description table as a CSV file:
 
-| TableID | Variable_name | Description | Units | How measured |
+``` r
+
+data(biomass)
+description <- make_description_table(data = biomass,
+                                      table_ID = "biomass",
+                                      path = NULL)
+description |> 
+  knitr::kable()
+```
+
+| TableID | Variable name | Description | Units | How measured |
 |:--------|:--------------|:------------|:------|:-------------|
+| biomass | year          | NA          | NA    | NA           |
+| biomass | siteID        | NA          | NA    | NA           |
+| biomass | blockID       | NA          | NA    | NA           |
+| biomass | plotID        | NA          | NA    | NA           |
+| biomass | treatment     | NA          | NA    | NA           |
+| biomass | removed_fg    | NA          | NA    | NA           |
+| biomass | biomass       | NA          | NA    | NA           |
 
-This table has to be populated with information.
+To write the description table to a CSV file (default path is
+“data_dic”):
 
-The **TableID** is optional and is a unique identifier for each dataset.
-The variable is useful when you have the same variable name in different
-datasets with different meanings. Then this variable defines which
-dataset a variable description belongs to. For example if you have use
-value it can be the value for biomass or decomposition and belonging to
-different datasets. You can use the different definitions for each
-dataset and distinguish them using TableID.
+``` r
 
-**Variable name** is the name of the variable in a dataset. It should be
-spelled exactly the same as in the dataset.
+# This creates data_dic/description_table.csv
+make_description_table(data = biomass,
+                       table_ID = "biomass")
+
+# Or specify a custom directory
+make_description_table(data = biomass,
+                       table_ID = "biomass",
+                       path = "my_custom_folder")
+```
+
+The function automatically extracts all variable names from your data
+and creates a template with the following columns:
+
+**TableID** is a unique identifier for each dataset. This is useful when
+you have the same variable name in different datasets with different
+meanings. For example, if you use “value” for both biomass and
+decomposition datasets, you can distinguish them using TableID.
+
+**Variable name** is the name of the variable in the dataset.
 
 **Description** is the description of the variable. It should be concise
 but detailed enough to understand the variable. For example:
 
 - Year of sampling
 - Unique plot ID is a combination of site, block and treatment
-- Removed functional group, including forbs, bryophytes, graminoids. For
-  extra controls also litter, pteridophytes, lichens, and cryptograms
+- Removed functional group, including forbs, bryophytes, graminoids
 
 **Units** defines the unit of a variable. For example g, cm<sup>3</sup>
 
 **How measured** describes how the variable was obtained. For example
 measured, recorded or defined.
 
-Fill in all the information for each variable in your dataset(s). If you
-have multiple datasets, all variables can be entered in the same
-document. Use **TableID** to identify the dataset.
+If you have already created description tables for other datasets, you
+can provide a **previous_description_table** to pre-fill variables that
+are already documented:
+
+``` r
+
+data(previous_description_table)
+previous_description_table |> 
+  knitr::kable()
+```
+
+| TableID | Variable name | Description      | Units | How measured |
+|:--------|:--------------|:-----------------|:------|:-------------|
+| NA      | year          | year of sampling | yyyy  | defined      |
+| NA      | siteID        | unique site code | NA    | defined      |
+
+``` r
+
+description <- make_description_table(data = biomass,
+                                      table_ID = "biomass",
+                                      previous_description_table = previous_description_table,
+                                      path = NULL)
+description |> 
+  knitr::kable()
+```
+
+| TableID | Variable name | Description      | Units | How measured |
+|:--------|:--------------|:-----------------|:------|:-------------|
+| biomass | year          | year of sampling | yyyy  | defined      |
+| biomass | siteID        | unique site code | NA    | defined      |
+| biomass | blockID       | NA               | NA    | NA           |
+| biomass | plotID        | NA               | NA    | NA           |
+| biomass | treatment     | NA               | NA    | NA           |
+| biomass | removed_fg    | NA               | NA    | NA           |
+| biomass | biomass       | NA               | NA    | NA           |
+
+This way, common variables like `year` and `siteID` are automatically
+filled in, and you only need to add descriptions for the new variables.
 
 ### make data dictionary
 
@@ -126,7 +172,7 @@ table**. The output looks like this:
 | removed_fg | Removed functional group, where F = forbs, B = bryophytes, G = graminoids. For extra  controls also L = litter, P = pteridophytes, LI = lichens, and C = cryptograms | categorical | B - G | NA | defined |
 | biomass | Dry weight of removed functional_group | numeric | 0.01 - 32.5 | g | measured |
 
-### meta data
+## Metadata
 
 The dataDocumentation also provides functions to create metadata for
 FUNDER, Durin and ThreeD. The functions are called
@@ -170,7 +216,7 @@ project name (FUNDEr, Durin or ThreeD).
 meta_data <- create_funder_meta_data(csv_output = TRUE, filename = "biomass")
 ```
 
-#### Durin meta data
+### Durin meta data
 
 For the Durin project, the meta data can be made for the 4Corners,
 DroughtNet or Nutrient study. The `create_durin_meta_data()` function
