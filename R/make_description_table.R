@@ -12,9 +12,10 @@
 #'
 #' @return a tibble with columns: TableID, Variable name, Description, Units, How measured
 #'
-#' @importFrom dplyr tibble left_join coalesce select mutate
+#' @importFrom dplyr tibble left_join coalesce select mutate all_of
 #' @importFrom tibble as_tibble
 #' @importFrom readr write_csv
+#' @importFrom rlang .data
 #' @examples
 #' data(biomass)
 #' description <- make_description_table(data = biomass,
@@ -58,18 +59,20 @@ make_description_table <- function(data, table_ID, previous_description_table = 
     description_table <- description_table |>
       left_join(
         previous_description_table |>
-          select(`Variable name`, Description_prev = Description,
-                 Units_prev = Units, `How measured_prev` = `How measured`),
+          select(all_of(c("Variable name")),
+                 Description_prev = all_of("Description"),
+                 Units_prev = all_of("Units"),
+                 `How measured_prev` = all_of("How measured")),
         by = "Variable name"
       ) |>
       # Use previous values if available, otherwise keep NA
       mutate(
-        Description = coalesce(Description_prev, Description),
-        Units = coalesce(Units_prev, Units),
-        `How measured` = coalesce(`How measured_prev`, `How measured`)
+        Description = coalesce(.data$Description_prev, .data$Description),
+        Units = coalesce(.data$Units_prev, .data$Units),
+        `How measured` = coalesce(.data$`How measured_prev`, .data$`How measured`)
       ) |>
       # Remove temporary columns
-      select(TableID, `Variable name`, Description, Units, `How measured`)
+      select(all_of(c("TableID", "Variable name", "Description", "Units", "How measured")))
 
   }
 
