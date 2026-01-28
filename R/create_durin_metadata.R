@@ -17,6 +17,8 @@
 #' @importFrom tidyr crossing
 #' @importFrom readr write_csv
 #' @importFrom stringr str_sub
+#' @importFrom rlang .data
+#' @importFrom utils data
 #'
 #' @examples
 #' create_durin_meta_data()
@@ -40,29 +42,32 @@ create_durin_meta_data <- function(study = NULL, csv_output = FALSE, filename = 
   plot_nr = c(1, 2, 3, 4, 5)
 
   durin_metadata <- crossing(site, habitat, sp, plot_nr) |>
-    filter(!c(species == "Calluna vulgaris" & siteID == "KA")) |>
-    mutate(biogeography = if_else(siteID %in% c("LY", "SO"), "Boreal", "Sub-arctic"),
-           oceantiy = if_else(siteID %in% c("LY", "SE"), "Coast", "Inland"),
-           plotID = paste(siteID, str_sub(habitat, 1, 1), speciesID, plot_nr, sep = "_")) |>
-    select(site_name, siteID, biogeography, oceantiy, habitat, species, speciesID, plot_nr, plotID)
+    filter(!c(.data$species == "Calluna vulgaris" & .data$siteID == "KA")) |>
+    mutate(biogeography = if_else(.data$siteID %in% c("LY", "SO"), "Boreal", "Sub-arctic"),
+           oceantiy = if_else(.data$siteID %in% c("LY", "SE"), "Coast", "Inland"),
+           plotID = paste(.data$siteID, str_sub(.data$habitat, 1, 1), .data$speciesID, plot_nr, sep = "_")) |>
+    select("site_name", "siteID", "biogeography", "oceantiy", "habitat", "species", "speciesID", "plot_nr", "plotID")
 
   # meta data DroughtNet study
   } else if(study == "DroughtNet"){
 
+    data("droughNet_meta", package = "dataDocumentation", envir = environment())
+    droughNet_meta <- get("droughNet_meta", envir = environment())
+
     meta <- droughNet_meta |>
-      mutate(plot_nr = str_sub(plot, 1,3)) |>
-      mutate(siteID = if_else(site_name == "Lygra", "LY", "TJ"),
-             age_classID = case_when(age_class == "Pioneer" ~ "PIO",
-                                     age_class == "Building" ~ "BUI",
-                                     age_class == "Mature" ~ "MAT"),
-             drought_treatmentID = toupper(str_sub(drought_treatment, 1, 3)),
+      mutate(plot_nr = str_sub(.data$plot, 1,3)) |>
+      mutate(siteID = if_else(.data$site_name == "Lygra", "LY", "TJ"),
+             age_classID = case_when(.data$age_class == "Pioneer" ~ "PIO",
+                                     .data$age_class == "Building" ~ "BUI",
+                                     .data$age_class == "Mature" ~ "MAT"),
+             drought_treatmentID = toupper(str_sub(.data$drought_treatment, 1, 3)),
              habitat = "Open")
     sp = tibble(species = c("Vaccinium myrtillus", "Vaccinium vitis-idaea", "Calluna vulgaris", "Empetrum nigrum"),
                 speciesID = c("VM", "VV", "CV", "EN"))
 
     durin_metadata <- crossing(meta, sp) |>
-      mutate(plotID = paste(siteID, age_classID, drought_treatmentID, plot_nr, sep = "_")) |>
-      select(site_name, siteID, geography, habitat, age_class, age_classID, drought_treatment, drought_treatmentID, plot_nr, plotID, species, speciesID, landpress_name)
+      mutate(plotID = paste(.data$siteID, .data$age_classID, .data$drought_treatmentID, .data$plot_nr, sep = "_")) |>
+      select("site_name", "siteID", "geography", "habitat", "age_class", "age_classID", "drought_treatment", "drought_treatmentID", "plot_nr", "plotID", "species", "speciesID", "landpress_name")
 
   # meta data Nutrient study
   } else if(study == "Nutrient"){
@@ -74,7 +79,7 @@ create_durin_meta_data <- function(study = NULL, csv_output = FALSE, filename = 
            age_classID = "BUI") |>
       crossing(nitrogen_addition = c(0, 1, 5, 10, 25),
                block_nr = c("N1", "N2", "N3", "N4", "N5")) |>
-      mutate(plotID = paste(block_nr, nitrogen_addition, sep = "-"))
+      mutate(plotID = paste(.data$block_nr, .data$nitrogen_addition, sep = "-"))
 
   } else {
     print("Warning: unknown study type. Choose 4Corners, DroughtNet or Nutrient")

@@ -8,6 +8,7 @@
 #' @importFrom dplyr left_join mutate select coalesce
 #' @importFrom readr read_csv
 #' @importFrom rlang .data
+#' @importFrom utils data
 #'
 #' @examples
 #' data(funder)
@@ -20,6 +21,7 @@
 funcabization <- function(dat, convert_to = "FunCaB"){
 
   data("dic", package = "dataDocumentation", envir = environment())
+  dic <- get("dic", envir = environment())
 
   # convert to FunCaB
   if(convert_to == "FunCaB"){
