@@ -7,11 +7,14 @@
 #' @param previous_description_table optional; a previous description table to
 #' pre-fill descriptions for variables that already exist. If NULL (default),
 #' all Description, Units, and How measured columns will be NA.
+#' @param path optional; file path to write the description table as a CSV file.
+#' If NULL (default), no file is written.
 #'
 #' @return a tibble with columns: TableID, Variable name, Description, Units, How measured
 #'
 #' @importFrom dplyr tibble left_join coalesce select mutate
 #' @importFrom tibble as_tibble
+#' @importFrom readr write_csv
 #' @examples
 #' data(biomass)
 #' description <- make_description_table(data = biomass,
@@ -22,9 +25,16 @@
 #' description <- make_description_table(data = biomass,
 #'                                        table_ID = "biomass",
 #'                                        previous_description_table = previous_description_table)
+#'
+#' # Write to CSV file
+#' \dontrun{
+#' make_description_table(data = biomass,
+#'                        table_ID = "biomass",
+#'                        path = "description_table.csv")
+#' }
 #' @export
 
-make_description_table <- function(data, table_ID, previous_description_table = NULL) {
+make_description_table <- function(data, table_ID, previous_description_table = NULL, path = NULL) {
 
   # Get all variable names from the data
 
@@ -61,6 +71,11 @@ make_description_table <- function(data, table_ID, previous_description_table = 
       # Remove temporary columns
       select(TableID, `Variable name`, Description, Units, `How measured`)
 
+  }
+
+  # Write to CSV if path is provided
+  if (!is.null(path)) {
+    write_csv(description_table, path)
   }
 
   description_table

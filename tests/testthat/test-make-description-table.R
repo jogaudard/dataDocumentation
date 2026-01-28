@@ -139,3 +139,38 @@ test_that("make_description_table preserves variable order from data", {
   expect_equal(result$`Variable name`, c("z_var", "a_var", "m_var"))
 
 })
+
+
+test_that("make_description_table writes CSV when path is provided", {
+
+  test_data <- tibble(
+    year = c(2020, 2021),
+    siteID = c("A", "B")
+  )
+
+  # Create temporary file path
+  temp_file <- tempfile(fileext = ".csv")
+
+  # Run function with path
+  result <- make_description_table(
+    data = test_data,
+    table_ID = "test",
+    path = temp_file
+  )
+
+  # Check that file was created
+  expect_true(file.exists(temp_file))
+
+  # Read the file back and compare
+  written_data <- readr::read_csv(temp_file, show_col_types = FALSE)
+  expect_equal(nrow(written_data), 2)
+  expect_equal(written_data$`Variable name`, c("year", "siteID"))
+
+  # Function should still return the tibble
+  expect_s3_class(result, "tbl_df")
+
+  # Clean up
+
+  unlink(temp_file)
+
+})
