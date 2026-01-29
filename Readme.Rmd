@@ -128,6 +128,69 @@ description |>
 This way, common variables like `year` and `siteID` are automatically filled in, and you only need to add descriptions for the new variables.
 
 
+### AI-powered description generation (optional)
+
+**NEW!** You can now use AI to automatically generate descriptions for your variables using Google's Gemini API.
+
+First, install the `gemini.R` package and set up your API key:
+
+``` {r ai-setup, eval=FALSE, echo=TRUE}
+
+# Install gemini.R package
+install.packages("gemini.R")
+
+# Get a free API key at: https://aistudio.google.com/apikey
+# Then set it as an environment variable
+Sys.setenv(GEMINI_API_KEY = "your-api-key-here")
+
+```
+
+Now you can use `populate_description_table()` to automatically fill in descriptions:
+
+``` {r ai-populate, eval=FALSE, echo=TRUE}
+
+# Create empty description table
+description <- make_description_table(data = biomass,
+                                      table_ID = "biomass",
+                                      path = NULL)
+
+# Automatically populate with AI
+description_filled <- populate_description_table(
+  data = biomass,
+  description_table = description
+)
+
+# Review and edit the results
+description_filled |> 
+  knitr::kable()
+
+```
+
+You can provide additional context to help the AI generate better descriptions:
+
+``` {r ai-context, eval=FALSE, echo=TRUE}
+
+description_filled <- populate_description_table(
+  data = biomass,
+  description_table = description,
+  dataset_context = "Biomass data from functional group removal experiment in alpine sites in western Norway"
+)
+
+```
+
+The AI will analyze your data and generate:
+
+- **Description**: A concise one-sentence description of each variable
+- **Units**: The unit of measurement (if applicable)
+- **How measured**: Whether the variable was defined, recorded, or measured
+
+**Important notes:**
+
+- The function only fills in variables that have NA values, so you can run it multiple times
+- Always review and edit the AI-generated descriptions before using them
+- The function uses the first 100 rows of your data for context
+
+
 ### make data dictionary
 
 The next step is to make the data dictionary.
