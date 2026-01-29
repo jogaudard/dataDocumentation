@@ -844,17 +844,71 @@ pre-fill variables that are already documented:</p>
 <p>This way, common variables like <code>year</code> and
 <code>siteID</code> are automatically filled in, and you only need to
 add descriptions for the new variables.</p>
+<h3 id="ai-powered-description-generation-optional">AI-powered
+description generation (optional)</h3>
+<p><strong>NEW!</strong> You can now use AI to automatically generate
+descriptions for your variables using Google’s Gemini API.</p>
+<p>First, install the <code>gemini.R</code> package and set up your API
+key:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co"># Install gemini.R package</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;gemini.R&quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co"># Get a free API key at: https://aistudio.google.com/apikey</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co"># Then set it as an environment variable</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">GEMINI_API_KEY =</span> <span class="st">&quot;your-api-key-here&quot;</span>)</span></code></pre></div>
+<p>Now you can use <code>populate_description_table()</code> to
+automatically fill in descriptions:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co"># Create empty description table</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>description <span class="ot">&lt;-</span> <span class="fu">make_description_table</span>(<span class="at">data =</span> biomass,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>                                      <span class="at">table_ID =</span> <span class="st">&quot;biomass&quot;</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>                                      <span class="at">path =</span> <span class="cn">NULL</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># Automatically populate with AI</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>description_filled <span class="ot">&lt;-</span> <span class="fu">populate_description_table</span>(</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="at">data =</span> biomass,</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  <span class="at">description_table =</span> description</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>)</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co"># Review and edit the results</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>description_filled <span class="sc">|&gt;</span> </span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<p>You can provide additional context to help the AI generate better
+descriptions:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>description_filled <span class="ot">&lt;-</span> <span class="fu">populate_description_table</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">data =</span> biomass,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">description_table =</span> description,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">dataset_context =</span> <span class="st">&quot;Biomass data from functional group removal experiment in alpine sites in western Norway&quot;</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>)</span></code></pre></div>
+<p>The AI will analyze your data and generate:</p>
+<ul>
+<li><strong>Description</strong>: A concise one-sentence description of
+each variable</li>
+<li><strong>Units</strong>: The unit of measurement (if applicable)</li>
+<li><strong>How measured</strong>: Whether the variable was defined,
+recorded, or measured</li>
+</ul>
+<p><strong>Important notes:</strong></p>
+<ul>
+<li>The function only fills in variables that have NA values, so you can
+run it multiple times</li>
+<li>Always review and edit the AI-generated descriptions before using
+them</li>
+<li>The function uses the first 100 rows of your data for context</li>
+</ul>
 <h3 id="make-data-dictionary">make data dictionary</h3>
 <p>The next step is to make the data dictionary. For this you can use
 the <code>make_data_dic()</code> function.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co"># load dataset and description table</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">data</span>(description_table)</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">data</span>(biomass)</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>data_dic <span class="ot">&lt;-</span> <span class="fu">make_data_dictionary</span>(<span class="at">data =</span> biomass,</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                                 <span class="at">description_table =</span> description_table,</span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>                                 <span class="at">table_ID =</span> <span class="st">&quot;biomass&quot;</span>,</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                                 <span class="at">keep_table_ID =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co"># load dataset and description table</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">data</span>(description_table)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="fu">data</span>(biomass)</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>data_dic <span class="ot">&lt;-</span> <span class="fu">make_data_dictionary</span>(<span class="at">data =</span> biomass,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>                                 <span class="at">description_table =</span> description_table,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>                                 <span class="at">table_ID =</span> <span class="st">&quot;biomass&quot;</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>                                 <span class="at">keep_table_ID =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <p>This function gets the <strong>range</strong>, and
 <strong>class</strong> for each variable in your dataset and combines
 this information with the <strong>description table</strong>. The output
@@ -944,31 +998,31 @@ plotID for FUNDER. For Durin there it can create 3 different meta data
 tables (see below). Origin and destination siteID, blockID and plotID,
 turfID, warming, grazing and Nlevel for ThreeD.</p>
 <p>Just run the code like this:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>meta_data <span class="ot">&lt;-</span> <span class="fu">create_funder_meta_data</span>()</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>meta_data</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; # A tibble: 384 × 4</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt;    siteID blockID treatment plotID </span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;  </span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt;  1 Alrust Alr1    B         Alr1B  </span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt;  2 Alrust Alr1    C         Alr1C  </span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt;  3 Alrust Alr1    F         Alr1F  </span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;  4 Alrust Alr1    FB        Alr1FB </span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt;  5 Alrust Alr1    FGB       Alr1FGB</span></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt;  6 Alrust Alr1    G         Alr1G  </span></span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt;  7 Alrust Alr1    GB        Alr1GB </span></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt;  8 Alrust Alr1    GF        Alr1GF </span></span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt;  9 Alrust Alr2    B         Alr2B  </span></span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; 10 Alrust Alr2    C         Alr2C  </span></span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; # ℹ 374 more rows</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>meta_data <span class="ot">&lt;-</span> <span class="fu">create_funder_meta_data</span>()</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>meta_data</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; # A tibble: 384 × 4</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt;    siteID blockID treatment plotID </span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;  </span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt;  1 Alrust Alr1    B         Alr1B  </span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt;  2 Alrust Alr1    C         Alr1C  </span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt;  3 Alrust Alr1    F         Alr1F  </span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt;  4 Alrust Alr1    FB        Alr1FB </span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;  5 Alrust Alr1    FGB       Alr1FGB</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt;  6 Alrust Alr1    G         Alr1G  </span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt;  7 Alrust Alr1    GB        Alr1GB </span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt;  8 Alrust Alr1    GF        Alr1GF </span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt;  9 Alrust Alr2    B         Alr2B  </span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; 10 Alrust Alr2    C         Alr2C  </span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; # ℹ 374 more rows</span></span></code></pre></div>
 <p>If you want to save the metadata as a csv file, set
 <code>csv_output = TRUE</code> and you can choose a file name
 <code>filename</code> (not mendatory). The data will be stored in the
 project directory. The file name always contains the project name
 (FUNDEr, Durin or ThreeD).</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a></span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>meta_data <span class="ot">&lt;-</span> <span class="fu">create_funder_meta_data</span>(<span class="at">csv_output =</span> <span class="cn">TRUE</span>, <span class="at">filename =</span> <span class="st">&quot;biomass&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>meta_data <span class="ot">&lt;-</span> <span class="fu">create_funder_meta_data</span>(<span class="at">csv_output =</span> <span class="cn">TRUE</span>, <span class="at">filename =</span> <span class="st">&quot;biomass&quot;</span>)</span></code></pre></div>
 <h3 id="durin-meta-data">Durin meta data</h3>
 <p>For the Durin project, the meta data can be made for the 4Corners,
 DroughtNet or Nutrient study. The <code>create_durin_meta_data()</code>
@@ -986,12 +1040,12 @@ versa. Note that data on OSF should be on FunCaB nomencaltur.</p>
 <code>dat</code> and takes the data for input. The second argument is
 <code>covnert_to</code> and here you define if you want to convert a
 dataset to <em>FunCaB</em> or <em>Funder</em> nomenclature.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">data</span>(funder)</span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">funcabization</span>(<span class="at">dat =</span> funder, <span class="at">convert_to =</span> <span class="st">&quot;FunCaB&quot;</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="fu">data</span>(funcab)</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="fu">funcabization</span>(<span class="at">dat =</span> funcab, <span class="at">convert_to =</span> <span class="st">&quot;Funder&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">data</span>(funder)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="fu">funcabization</span>(<span class="at">dat =</span> funder, <span class="at">convert_to =</span> <span class="st">&quot;FunCaB&quot;</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="fu">data</span>(funcab)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="fu">funcabization</span>(<span class="at">dat =</span> funcab, <span class="at">convert_to =</span> <span class="st">&quot;Funder&quot;</span>)</span></code></pre></div>
 
 </body>
 </html>
