@@ -9,7 +9,7 @@ populate_description_table(
   description_table,
   dataset_context = NULL,
   n_rows = 100,
-  model = "gemini-2.0-flash-exp",
+  model = "2.5-flash",
   verbose = TRUE
 )
 }
@@ -24,7 +24,8 @@ data collection to help the AI generate better descriptions. Default is NULL.}
 
 \item{n_rows}{number of sample rows to send to Gemini for context. Default is 100.}
 
-\item{model}{Gemini model to use. Default is "gemini-2.0-flash-exp".}
+\item{model}{Gemini model to use. Default is "2.5-flash".
+Other options: "2.5-pro", "2.0-flash", "1.5-pro".}
 
 \item{verbose}{logical; if TRUE, shows progress messages. Default is TRUE.}
 }

@@ -26,7 +26,7 @@
 #' @importFrom dplyr filter mutate select all_of pull
 #' @importFrom tibble as_tibble
 #' @importFrom rlang .data
-#' @importFrom utils head
+#' @importFrom utils head capture.output
 #'
 #' @examples
 #' \dontrun{

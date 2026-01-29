@@ -16,7 +16,11 @@ test_that("populate_description_table requires gemini.R package", {
     `How measured` = NA_character_
   )
 
-  # This test just checks the function exists and has proper error handling
+  # Save current API key and unset it temporarily
+  old_key <- Sys.getenv("GEMINI_API_KEY")
+  Sys.unsetenv("GEMINI_API_KEY")
+
+  # This test checks error handling when API key is missing
   expect_error(
     populate_description_table(
       data = test_data,
@@ -24,6 +28,11 @@ test_that("populate_description_table requires gemini.R package", {
     ),
     "GEMINI_API_KEY"
   )
+
+  # Restore original API key
+  if (old_key != "") {
+    Sys.setenv(GEMINI_API_KEY = old_key)
+  }
 })
 
 
