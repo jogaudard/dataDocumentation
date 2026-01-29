@@ -114,6 +114,9 @@ populate_description_table <- function(data,
   # Prepare data sample
   data_sample <- head(data, n_rows)
 
+  # Get all variable names for context
+  all_var_names <- paste(names(data), collapse = ", ")
+
   # Process each variable
   for (i in seq_along(needs_completion)) {
     var_name <- needs_completion[i]
@@ -131,7 +134,7 @@ populate_description_table <- function(data,
     # Get sample of this variable
     var_sample <- data_sample[[var_name]]
 
-    # Prepare sample text
+    # Prepare sample text for current variable
     sample_text <- paste(
       "First", min(n_rows, length(var_sample)), "values:",
       paste(head(var_sample, 20), collapse = ", ")
@@ -147,19 +150,35 @@ populate_description_table <- function(data,
       )
     }
 
+    # Add sample data from related variables for context (first 5 rows)
+    related_vars <- setdiff(names(data), var_name)
+    if (length(related_vars) > 0 && nrow(data_sample) > 0) {
+      related_sample <- data_sample[1:min(5, nrow(data_sample)), related_vars, drop = FALSE]
+      related_text <- paste("\nRelated variables (first 5 rows for context):\n",
+                           paste(capture.output(print(related_sample, n = 5)), collapse = "\n"))
+    } else {
+      related_text <- ""
+    }
+
     # Build prompt
     prompt <- paste0(
       "You are helping document a scientific dataset.\n\n",
       if (!is.null(dataset_context)) paste0("Dataset context: ", dataset_context, "\n\n"),
-      "Variable name: ", var_name, "\n\n",
-      "Sample data:\n", sample_text, "\n\n",
+      "All variables in dataset: ", all_var_names, "\n\n",
+      "Variable to document: ", var_name, "\n\n",
+      "Sample data for this variable:\n", sample_text, "\n",
+      related_text, "\n\n",
       "Please provide:\n",
-      "1. Description: A concise one-sentence description of this variable\n",
-      "2. Units: The unit of measurement (if applicable, otherwise write 'NA')\n",
-      "3. How measured: How this variable was obtained (choose exactly one: 'defined', 'recorded', or 'measured')\n\n",
+      "1. Description: A concise description of this variable (1-3 sentences). ",
+      "If this variable is related to or derived from other variables (e.g., plotID combines siteID, blockID, and treatment), ",
+      "mention these relationships. If the variable contains abbreviations or codes, define them in the description ",
+      "(e.g., 'F = forbs, G = graminoids, B = bryophytes').\n",
+      "2. Units: The unit of measurement using SI standard abbreviations (e.g., 'g', 'cm', 'm^2', 'kg/ha'). ",
+      "If no units apply, write 'NA'.\n",
+      "3. How measured: How this variable was obtained (choose exactly one: 'defined', 'recorded', or 'measured').\n\n",
       "Format your response EXACTLY as follows (keep the labels):\n",
       "Description: [your description here]\n",
-      "Units: [units or NA]\n",
+      "Units: [SI units or NA]\n",
       "How measured: [defined/recorded/measured]"
     )
 
