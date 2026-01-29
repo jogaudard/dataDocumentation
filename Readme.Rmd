@@ -127,10 +127,12 @@ description |>
 
 This way, common variables like `year` and `siteID` are automatically filled in, and you only need to add descriptions for the new variables.
 
+**Manual editing**: Once you have the description table (either empty or pre-filled), you can edit it manually in a spreadsheet program or text editor. This is the recommended workflow for most users.
+
 
 ### AI-powered description generation (optional)
 
-**NEW!** You can now use AI to automatically generate descriptions for your variables using Google's Gemini API.
+**OPTIONAL:** If you want to speed up the process, you can use AI to automatically generate initial descriptions for your variables using Google's Gemini API. You should always review and edit the AI-generated content.
 
 First, install the `gemini.R` package and set up your API key:
 
@@ -140,8 +142,14 @@ First, install the `gemini.R` package and set up your API key:
 install.packages("gemini.R")
 
 # Get a free API key at: https://aistudio.google.com/apikey
-# Then set it as an environment variable
+# Set it as an environment variable (only visible to you, not pushed to GitHub)
 Sys.setenv(GEMINI_API_KEY = "your-api-key-here")
+
+# For persistent use, add to .Renviron file (already in .gitignore):
+usethis::edit_r_environ()
+# Add line: GEMINI_API_KEY=your-key-here
+# Save, close, and restart R
+# Your key is now loaded automatically and safely protected from GitHub
 
 ```
 
@@ -154,41 +162,53 @@ description <- make_description_table(data = biomass,
                                       table_ID = "biomass",
                                       path = NULL)
 
-# Automatically populate with AI
+# Automatically populate with AI (shows progress by default)
 description_filled <- populate_description_table(
   data = biomass,
-  description_table = description
+  description_table = description,
+  model = "2.5-flash",  # Options: "2.5-flash", "2.5-pro", "2.0-flash"
+  verbose = TRUE  # Show progress (default)
 )
 
-# Review and edit the results
+# Review and edit the results - AI is not perfect!
 description_filled |> 
   knitr::kable()
 
 ```
 
-You can provide additional context to help the AI generate better descriptions:
+You can provide additional context to help the AI generate better descriptions. Context can be a character string or read from a text file:
 
 ``` {r ai-context, eval=FALSE, echo=TRUE}
 
+# Option 1: Provide context as a string
 description_filled <- populate_description_table(
   data = biomass,
   description_table = description,
   dataset_context = "Biomass data from functional group removal experiment in alpine sites in western Norway"
 )
 
+# Option 2: Read context from a text file
+context_text <- readr::read_file("data_context.txt")
+description_filled <- populate_description_table(
+  data = biomass,
+  description_table = description,
+  dataset_context = context_text
+)
+
 ```
 
 The AI will analyze your data and generate:
 
-- **Description**: A concise one-sentence description of each variable
-- **Units**: The unit of measurement (if applicable)
+- **Description**: A concise description (1-3 sentences) that identifies relationships between variables and defines abbreviations
+- **Units**: The unit of measurement in SI standard abbreviations (g, cm, m^2, etc.)
 - **How measured**: Whether the variable was defined, recorded, or measured
 
 **Important notes:**
 
+- **Always review and edit** the AI-generated descriptions - they may not be perfect
 - The function only fills in variables that have NA values, so you can run it multiple times
-- Always review and edit the AI-generated descriptions before using them
 - The function uses the first 100 rows of your data for context
+- Your API key is private and never shared or committed to GitHub
 
 
 ### make data dictionary
