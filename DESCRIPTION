@@ -2,7 +2,7 @@ Package: dataDocumentation
 Title: Between the Fjord data documentation
 Version: 0.0.1
 Authors@R: 
-    person("Aud", "Halbritter", , "aud.halbritter@uib.no", role = c("aut", "cre"),
+    person("Aud H.", "Halbritter", , "aud.halbritter@uib.no", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-2597-6328"))
 Description: This package explains the data documentation in the BTF lab. It also contains functions helping with data documentation, such as creating a data dictionary.
 License: MIT + file LICENSE
